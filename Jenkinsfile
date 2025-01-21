@@ -8,7 +8,7 @@ podTemplate(
   ])
 
 {
-  node('POD_LABEL') {
+  node(POD_LABEL) {
     stage('Checkout') {
       checkout scm
     }
