@@ -8,7 +8,7 @@ podTemplate(
   ])
 
 {
-  node('jnlp') {
+  node('POD_LABEL') {
     stage('Checkout') {
       checkout scm
     }
