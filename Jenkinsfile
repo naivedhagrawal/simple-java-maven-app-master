@@ -17,5 +17,17 @@ podTemplate(
         sh 'mvn -B -DskipTests clean package'
       }
     }
+    stage('test') {
+      container('all-in-one') {
+        sh 'mvn test'
+      }
+    }
+    stage('Deliver') {
+      container('all-in-one'){
+            steps {
+                sh './jenkins/scripts/deliver.sh'
+            }
+      }
+    }
   }
 }
