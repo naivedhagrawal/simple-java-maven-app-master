@@ -1,10 +1,12 @@
 @Library('Shared-Libraries') _
 pipeline {
+  //Agent setup
   agent {
     kubernetes {
       yaml pod('maven', 'maven:3.8.7')
     }
   }
+  // Stages Steps and Container
   stages {
     stage('Code Clone') {
       steps {
