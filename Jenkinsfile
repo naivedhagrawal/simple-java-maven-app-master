@@ -1,29 +1,30 @@
 @Library('Shared-Libraries') _
 pipeline {
-  //Agent setup
-  agent {
-    kubernetes {
-      yaml pod('maven', 'maven:3.8.7')
-    }
-  }
-  // Stages Steps and Container
   stages {
-    stage('Code Clone') {
+    stage('Code Clone, Build, Test') {
+      agent {
+            kubernetes {
+              yaml pod('maven', 'maven:3.8.7')
+            }
+      }
       steps {
         checkout scm
-      }
-    }
-    stage('Build') {
-      steps {
         container('maven') {
           sh 'mvn -B -DskipTests clean package'
+          sh 'mvn test'
         }
       }
     }
-    stage('test') {
-      steps{
-        container('maven') {
-          sh 'mvn test'
+    stage ('snyk') {
+      agent {
+            kubernetes {
+              yaml snyk()
+            }
+      }
+      steps {
+        container('snyk'){
+          checkout scm
+          sh 'snyk code test'
         }
       }
     }
