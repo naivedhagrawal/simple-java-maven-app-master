@@ -2,7 +2,7 @@
 pipeline {
   agent {
     kubernetes {
-      yaml pod(maven, maven:latest)
+      yaml pod('maven', 'maven:latest')
     }
   }
   stages {
