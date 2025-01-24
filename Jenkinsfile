@@ -1,4 +1,4 @@
-@Library('Shared-Library') _
+@Library('Shared-Libraries') _
 pipeline {
   agent {
     kubernetes {
