@@ -25,7 +25,8 @@ pipeline {
         steps {
           checkout scm
           container('snyk'){
-            sh 'SNYK_TOKEN=$SNYK_TOKEN snyk test'
+            sh 'snyk auth $SNYK_TOKEN'
+            sh 'snyk test'
           }
         }
       }
