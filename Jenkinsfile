@@ -5,7 +5,7 @@ pipeline {
       stage ('snyk') {
         agent {
               kubernetes {
-                yaml pod('snyk','snyk/snyk:maven-3-jdk-11')
+                yaml pod('snyk','naivedh/snyk-image:latest')
               }
         }
         steps {
