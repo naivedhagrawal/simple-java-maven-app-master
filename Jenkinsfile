@@ -14,7 +14,9 @@ pipeline {
         steps {
           checkout scm
           container('snyk'){
-            
+            script {
+              snyk('maven', env.SNYK_TOKEN , false , '' , false)
+            }
           }
         }
       }
