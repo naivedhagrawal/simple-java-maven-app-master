@@ -11,8 +11,10 @@ pipeline {
         steps {
           checkout scm
           container('snyk'){
-            sh 'snyk auth $SNYK_TOKEN'
-            sh 'snyk test'
+            withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
+              sh 'snyk auth $SNYK_TOKEN'
+              sh 'snyk test'
+            }
           }
         }
       }
