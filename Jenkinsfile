@@ -12,7 +12,10 @@ pipeline {
           checkout scm
           container('snyk'){
             script {
+              withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
+              sh 'snyk auth $SNYK_TOKEN'
               snyk('maven')
+              }
             }
           }
         }
