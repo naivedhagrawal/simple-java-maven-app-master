@@ -2,7 +2,7 @@
 pipeline {
   agent none
     stages {
-      stage('Code Clone, Build, Test') {
+      stage('Code Clone, Build') {
         agent {
               kubernetes {
                 yaml pod('maven', 'maven:3.8.7')
