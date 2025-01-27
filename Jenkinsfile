@@ -1,21 +1,20 @@
 @Library('Shared-Libraries') _
 pipeline {
   agent none
+  environment {
+        SNYK_TOKEN = credentials('SNYK_TOKEN')
+        }
     stages {
       stage ('snyk') {
         agent {
               kubernetes {
-                yaml snyk('maven')
+                yaml snyk('maven', env.SNYK_TOKEN , false , '' , false)
               }
         }
         steps {
           checkout scm
           container('snyk'){
-            withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
-              sh 'snyk auth $SNYK_TOKEN'
-              sh 'snyk iac test'
-              sh 'snyk test'
-            }
+            
           }
         }
       }
