@@ -19,12 +19,12 @@ pipeline {
       stage ('snyk') {
         agent {
               kubernetes {
-                yaml snyk()
+                yaml pod('snyk',snyk/snyk:maven-3-jdk-11)
               }
         }
         steps {
+          checkout scm
           container('snyk'){
-            checkout scm
             sh 'snyk test'
           }
         }
