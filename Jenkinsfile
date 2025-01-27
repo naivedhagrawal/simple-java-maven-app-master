@@ -2,20 +2,6 @@
 pipeline {
   agent none
     stages {
-      stage('Code Clone, Build') {
-        agent {
-              kubernetes {
-                yaml pod('maven', 'maven:3.8.7')
-              }
-        }
-        steps {
-          checkout scm
-          container('maven') {
-            sh 'mvn -B -DskipTests clean package'
-            
-          }
-        }
-      }
       stage ('snyk') {
         agent {
               kubernetes {
@@ -27,6 +13,20 @@ pipeline {
           container('snyk'){
             sh 'snyk auth $SNYK_TOKEN'
             sh 'snyk test'
+          }
+        }
+      }
+      stage('Code Clone, Build') {
+        agent {
+              kubernetes {
+                yaml pod('maven', 'maven:3.8.7')
+              }
+        }
+        steps {
+          checkout scm
+          container('maven') {
+            sh 'mvn -B -DskipTests clean package'
+            
           }
         }
       }
