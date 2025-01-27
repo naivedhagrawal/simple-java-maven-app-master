@@ -6,14 +6,14 @@ pipeline {
         }
     stages {
       stage ('Snyk Scan') {
-        agent { kubernetes { yaml snyk('maven') }
+        agent { kubernetes { yaml snyk('maven', false, '', false) }
         }
         steps {
           checkout scm
           container('snyk'){
             script {
               withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
-              snyk('maven')
+              snyk('maven', false, '', false)
               }
             }
           }
