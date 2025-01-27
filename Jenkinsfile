@@ -9,7 +9,6 @@ pipeline {
         agent { kubernetes { yaml snyk('maven', false, '', false) }
         }
         steps {
-          checkout scm
           container('snyk'){
             script {
               withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
