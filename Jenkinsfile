@@ -11,9 +11,7 @@ pipeline {
         steps {
           container('snyk'){
             script {
-              withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
               snyk('maven', false, '', false)
-              }
             }
           }
         }
