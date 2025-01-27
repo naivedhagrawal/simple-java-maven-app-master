@@ -25,7 +25,7 @@ pipeline {
         steps {
           container('snyk'){
             checkout scm
-            sh 'snyk code test'
+            sh 'snyk test'
           }
         }
       }
