@@ -21,7 +21,7 @@ pipeline {
       steps {
         container('zap') {
           script {
-                    def zapPodName = 'zap-pod' // Name of the ZAP pod
+                    def zapPodName = 'zap' // Name of the ZAP pod
                     def zapService = 'zap-service' // Name of the ZAP service (explained below)
                     def targetUrl = 'http://<your-application-service>:<your-application-port>' // URL of your application in Kubernetes
 
