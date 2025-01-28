@@ -28,7 +28,7 @@ pipeline {
     stage('Owasp Dependency Check') {
       agent {
         kubernetes {
-          yaml pod('owasp','owasp/dependency-check:latest')
+          yaml pod('owasp','naivedh/owasp-dep:latest')
           showRawYaml false
         }
       }
