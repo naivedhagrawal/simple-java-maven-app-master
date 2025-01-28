@@ -89,9 +89,9 @@ pipeline {
       steps {
         container('zap') {
           sh """
-              /zap/zap.sh -daemon -port 8080 -newsession &
+              /zap/zap.sh -daemon -port 8080 &  # Start ZAP in daemon mode
 
-              sleep 10  # Wait for ZAP to initialize
+              sleep 15  # Wait for ZAP to initialize
 
               echo "Running the active scan..."
               /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
