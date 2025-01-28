@@ -6,7 +6,6 @@ pipeline {
   environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        NVD_API_KEY = credentials('NVD_API_KEY')
     }
   stages {
     stage('Gitleak Check') {
@@ -35,10 +34,12 @@ pipeline {
       }
       steps {
         container('owasp') {
+          withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
           sh """
               dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
+          }
         }
       }
     }
