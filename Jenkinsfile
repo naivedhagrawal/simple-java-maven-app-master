@@ -21,27 +21,27 @@ pipeline {
       steps {
         container('zap') {
           script {
-            // Start ZAP in daemon mode
-            sh """
-              /zap/zap.sh -daemon -port 8080 -host 127.0.0.1 -config api.disablekey=true -newsession /tmp/zap-session
-            """
-            // Wait for ZAP to fully initialize
-            sleep 60
+              // Start ZAP in daemon mode
+              sh """
+                /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session
+              """
+              // Wait for ZAP to fully initialize
+              sleep 60
 
-            // Run the spider scan
-            sh """
-              echo "Running the spider scan..."
-              /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
-            """
-            // Wait for the spider scan to complete
-            sleep 30
+              // Run the spider scan
+              sh """
+                echo "Running the spider scan..."
+                /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
+              """
+              // Wait for the spider scan to complete
+              sleep 30
 
-            // Run the active scan
-            sh """
-              echo "Running the active scan..."
-              /zap/zap.sh -cmd -config scanner.attackOnStart=true activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
-            """
-          }
+              // Run the active scan
+              sh """
+                echo "Running the active scan..."
+                /zap/zap.sh -cmd -config scanner.attackOnStart=true activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
+        """
+      }
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
