@@ -10,12 +10,12 @@ pipeline {
     stage('Gitleak Check') {
       agent {
         kubernetes {
-          yaml pod('Gitleak','zricethezav/gitleaks')
+          yaml pod('gitleak','zricethezav/gitleaks')
           showRawYaml false
         }
       }
       steps {
-        container('Gitleak') {
+        container('gitleak') {
           sh """
               gitleaks version
               gitleaks detect --source=. --report=${env.GITLEAKS_REPORT}
