@@ -21,47 +21,15 @@ pipeline {
       steps {
         container('zap') {
           script {
-                    def zapPodName = 'zap' // Name of the ZAP pod
-                    def zapService = 'zap-service' // Name of the ZAP service (explained below)
-                    def targetUrl = 'http://<your-application-service>:<your-application-port>' // URL of your application in Kubernetes
+                sh """
+                    echo "Running the spider scan..."
+                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
+                    sleep 30
 
-                    // 1. Create a Service for the ZAP pod (Important for accessibility within the cluster)
-                    sh "kubectl expose pod ${zapPodName} --port=8080 --target-port=8080 --name=${zapService}"
-
-                    // 2. Wait for ZAP to start (Check the logs for confirmation) - Improve with proper readiness probe
-                    sleep(time: 30, unit: 'SECONDS') // Adjust as needed
-
-                    // 3. Run the ZAP scan using the ZAP API - Example using `curl`
-                    sh """
-                        curl -X POST "http://${zapService}:8080/JSON/core/action/zap/newScan" -H "Content-Type: application/json" -d '{"url": "${targetUrl}", "recurse": true}'
-                    """
-
-                    // 4. Get the scan ID
-                    def scanId = sh(returnStdout: true, script: """
-                        curl -s "http://${zapService}:8080/JSON/core/view/lastScan" | jq -r '.scan.id'
-                    """).trim()
-
-                    // 5. Poll for scan completion (Improve with proper status checks)
-                    while (true) {
-                        def scanStatus = sh(returnStdout: true, script: """
-                            curl -s "http://${zapService}:8080/JSON/core/view/scanProgress?scanId=${scanId}" | jq -r '.scan.progress'
-                        """).trim()
-                        echo "Scan Progress: ${scanStatus}%"
-                        if (scanStatus == '100') {
-                            break
-                        }
-                        sleep(time: 10, unit: 'SECONDS')
-                    }
-
-                    // 6. Generate and publish the ZAP report
-                    sh """
-                        curl -X GET "http://${zapService}:8080/JSON/core/other/generateReport" -H "Content-Type: application/json" -d '{"type":"html","fileName":"zap_report.html"}' > zap_report.html
-                    """
-                    publishHTML([path: 'zap_report.html', description: 'ZAP Scan Report'])
-
-                    // 7. Delete the ZAP service (Cleanup)
-                    sh "kubectl delete service ${zapService}"
-                }
+                    echo "Running the active scan..."
+                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}  # Use the same home directory
+                """
+            }
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
