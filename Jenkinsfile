@@ -48,7 +48,7 @@ pipeline {
     stage('Owasp zap') {
       agent {
         kubernetes {
-          yaml pod()
+          yaml zap()
           showRawYaml false
         }
       }
@@ -61,7 +61,6 @@ pipeline {
               /zap.sh -cmd shutdown
               """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
-          }
         }
       }
     }
