@@ -5,7 +5,7 @@ pipeline {
   agent none
   stages {
     stage('Maven Build') {
-      agent { kubernetes { yaml pod('maven','latest') } }
+      agent { kubernetes { yaml pod('maven:latest') } }
       steps {
         container('maven') {
           sh """
