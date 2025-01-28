@@ -15,7 +15,7 @@ pipeline {
         }
       }
       steps {
-        container('maven') {
+        container('Gitleak') {
           sh """
               gitleaks version
               gitleaks detect --source=. --report=${env.GITLEAKS_REPORT}
