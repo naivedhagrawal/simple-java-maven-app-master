@@ -35,9 +35,9 @@ pipeline {
       steps {
         container('owasp') {
           sh """
-            ls -al /usr/local/bin/
-            which dependency-check || echo 'Dependency-Check not found'
-            dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v12.0.1/dependency-check-12.0.1-release.zip
+          unzip dependency-check-12.0.1-release.zip -d /opt
+          /opt/dependency-check/bin/dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
         }
