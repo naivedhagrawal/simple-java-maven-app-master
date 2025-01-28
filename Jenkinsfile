@@ -90,10 +90,10 @@ pipeline {
         container('zap') {
           sh """
               export ZAP_PATH=/zap/zap.sh  # Ensure the correct path is set
-                ${ZAP_PATH} -daemon -port 8080 &  # Start ZAP in daemon mode
-                sleep 10  # Wait for ZAP to initialize
-                ${ZAP_PATH} -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}  # Run active scan
-              """
+              \$ZAP_PATH -daemon -port 8080 &  # Start ZAP in daemon mode
+              sleep 10  # Wait for ZAP to initialize
+              \$ZAP_PATH -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}  # Run active scan
+            """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
