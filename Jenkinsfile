@@ -21,33 +21,47 @@ pipeline {
       steps {
         container('zap') {
           script {
-                sh """
-                    # Kill previous ZAP instances (if any)
-                    pkill -f "/zap/zap.sh -daemon"
-                    echo "pkill exit code: \$?"
-                    sleep 5
+                    def zapPodName = 'zap-pod' // Name of the ZAP pod
+                    def zapService = 'zap-service' // Name of the ZAP service (explained below)
+                    def targetUrl = 'http://<your-application-service>:<your-application-port>' // URL of your application in Kubernetes
 
-                    mkdir -p /tmp/zap-home-${BUILD_NUMBER}
+                    // 1. Create a Service for the ZAP pod (Important for accessibility within the cluster)
+                    sh "kubectl expose pod ${zapPodName} --port=8080 --target-port=8080 --name=${zapService}"
 
-                    # Start ZAP in the foreground, then detach using nohup
-                    nohup /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session -home /tmp/zap-home-${BUILD_NUMBER} > /tmp/zap.out 2>&1 &  # Redirect output to a file and run in background
-                    echo "ZAP started in background. Check /tmp/zap.out for logs."
+                    // 2. Wait for ZAP to start (Check the logs for confirmation) - Improve with proper readiness probe
+                    sleep(time: 30, unit: 'SECONDS') // Adjust as needed
 
-                    # Give ZAP some time to start
-                    sleep 30  # Adjust as needed
+                    // 3. Run the ZAP scan using the ZAP API - Example using `curl`
+                    sh """
+                        curl -X POST "http://${zapService}:8080/JSON/core/action/zap/newScan" -H "Content-Type: application/json" -d '{"url": "${targetUrl}", "recurse": true}'
+                    """
 
-                    echo "Running the spider scan..."
-                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL} -home /tmp/zap-home-${BUILD_NUMBER}
+                    // 4. Get the scan ID
+                    def scanId = sh(returnStdout: true, script: """
+                        curl -s "http://${zapService}:8080/JSON/core/view/lastScan" | jq -r '.scan.id'
+                    """).trim()
 
-                    echo "Running the active scan..."
-                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}
+                    // 5. Poll for scan completion (Improve with proper status checks)
+                    while (true) {
+                        def scanStatus = sh(returnStdout: true, script: """
+                            curl -s "http://${zapService}:8080/JSON/core/view/scanProgress?scanId=${scanId}" | jq -r '.scan.progress'
+                        """).trim()
+                        echo "Scan Progress: ${scanStatus}%"
+                        if (scanStatus == '100') {
+                            break
+                        }
+                        sleep(time: 10, unit: 'SECONDS')
+                    }
 
-                    # You might want to add a step here to stop ZAP after your scans are done, if needed.
-                    # For Example:
-                    # pkill -f "/zap/zap.sh -daemon"
-                    # echo "ZAP stopped."
-                """
-            }
+                    // 6. Generate and publish the ZAP report
+                    sh """
+                        curl -X GET "http://${zapService}:8080/JSON/core/other/generateReport" -H "Content-Type: application/json" -d '{"type":"html","fileName":"zap_report.html"}' > zap_report.html
+                    """
+                    publishHTML([path: 'zap_report.html', description: 'ZAP Scan Report'])
+
+                    // 7. Delete the ZAP service (Cleanup)
+                    sh "kubectl delete service ${zapService}"
+                }
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
