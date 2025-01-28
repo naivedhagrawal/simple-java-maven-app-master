@@ -91,6 +91,7 @@ pipeline {
           sh """
               # Generate a unique temporary directory for this run
                 export ZAP_HOME=/tmp/zap-home-\$(date +%s)  # Unique directory for this run
+                export HOME=\$ZAP_HOME  # Ensure HOME is also set to this unique directory
 
                 # Ensure the directory exists
                 mkdir -p \$ZAP_HOME
