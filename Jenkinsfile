@@ -22,24 +22,30 @@ pipeline {
         container('zap') {
           script {
                 sh """
-                    echo "Processes before pkill:"
-                    ps aux
+                    # Kill previous ZAP instances (if any)
                     pkill -f "/zap/zap.sh -daemon"
                     echo "pkill exit code: \$?"
                     sleep 5
-                    echo "Processes after pkill:"
-                    ps aux
-                    sleep 5
-                    mkdir -p /tmp/zap-home-${BUILD_NUMBER} # Unique home directory
-                    /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session -home /tmp/zap-home-${BUILD_NUMBER}
-                    sleep 60
+
+                    mkdir -p /tmp/zap-home-${BUILD_NUMBER}
+
+                    # Start ZAP in the foreground, then detach using nohup
+                    nohup /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session -home /tmp/zap-home-${BUILD_NUMBER} > /tmp/zap.out 2>&1 &  # Redirect output to a file and run in background
+                    echo "ZAP started in background. Check /tmp/zap.out for logs."
+
+                    # Give ZAP some time to start
+                    sleep 30  # Adjust as needed
 
                     echo "Running the spider scan..."
-                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
-                    sleep 30
+                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL} -home /tmp/zap-home-${BUILD_NUMBER}
 
                     echo "Running the active scan..."
-                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}  # Use the same home directory
+                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}
+
+                    # You might want to add a step here to stop ZAP after your scans are done, if needed.
+                    # For Example:
+                    # pkill -f "/zap/zap.sh -daemon"
+                    # echo "ZAP stopped."
                 """
             }
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
