@@ -5,6 +5,7 @@ pipeline {
   agent none
   environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
+        OWASP_DEP_REPORT = 'owasp-dep-report.json'
     }
   stages {
     stage('Gitleak Check') {
@@ -24,6 +25,22 @@ pipeline {
         }
       }
     }
+    stage('Owasp Dependency Check') {
+      agent {
+        kubernetes {
+          yaml pod('owasp','owasp/dependency-check')
+          showRawYaml false
+        }
+      }
+      steps {
+        container('owasp') {
+          sh """
+              dependency-check.sh --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
+          """
+          archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
+        }
+      }
+    }
     stage('Maven Build') {
       agent {
         kubernetes {
@@ -35,6 +52,7 @@ pipeline {
         container('maven') {
           sh """
               mvn -version
+              mvn clean package
           """
         }
       }
