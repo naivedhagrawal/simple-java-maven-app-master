@@ -1,34 +1,37 @@
-@Library('Shared-Libraries') _
-pipeline {
-  agent none
-  environment {
-        SNYK_TOKEN = credentials('SNYK_TOKEN')
-        }
-    stages {
-      stage ('Snyk Scan') {
-        agent { kubernetes { yaml snyk('maven', false, '', false) }
-        }
-        steps {
-          container('snyk'){
-            script {
-              snyk('maven', false, '', false)
-            }
-          }
-        }
-      }
-      stage('Code Clone, Build') {
-        agent {
-              kubernetes {
-                yaml pod('maven', 'maven:3.8.7')
-              }
-        }
-        steps {
-          checkout scm
-          container('maven') {
-            sh 'mvn -B -DskipTests clean package'
-            
-          }
-        }
-      }
-    }
-}
+@Library('k8s-shared-lib') _
+
+k8sPipeline([
+    [
+        name: 'Build',
+        gitUrl: 'https://github.com/myorg/myproject.git',
+        branch: 'feature/build-optimization', // Specify branch (optional)
+        podImage: 'my-build-image',
+        podImageVersion: 'v1.0.0',
+        steps: [
+            'echo "Building application..."',
+            './build.sh'
+        ]
+    ],
+    [
+        name: 'Test',
+        gitUrl: 'https://github.com/myorg/myproject.git',
+        branch: 'develop', // Specify a different branch
+        podImage: 'my-test-image',
+        podImageVersion: 'v1.1.0',
+        steps: [
+            'echo "Running tests..."',
+            './run-tests.sh'
+        ]
+    ],
+    [
+        name: 'Deploy',
+        gitUrl: 'https://github.com/myorg/myproject.git',
+        // No branch specified; defaults to 'main'
+        podImage: 'my-deploy-image',
+        podImageVersion: 'v2.0.0',
+        steps: [
+            'echo "Deploying application..."',
+            './deploy.sh'
+        ]
+    ]
+])
