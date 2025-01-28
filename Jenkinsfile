@@ -89,12 +89,15 @@ pipeline {
       steps {
         container('zap') {
           sh """
-              /zap/zap.sh -daemon -port 8080 &  # Start ZAP in daemon mode
+              /zap/zap.sh -daemon -port 8080 -host 127.0.0.1 -config api.disablekey=true -newsession /tmp/zap-session
 
-              sleep 15  # Wait for ZAP to initialize
+              sleep 30  # Increased wait time for ZAP to fully initialize
+
+              echo "Running the spider scan..."
+              /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
 
               echo "Running the active scan..."
-              /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
+              /zap/zap.sh -cmd -config scanner.attackOnStart=true activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
             """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
