@@ -6,7 +6,7 @@ pipeline {
   environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        NVD_API_KEY = credentials('4cfa7762-5400-4003-86c6-b2121dcb000f')
+        NVD_API_KEY = credentials('NVD_API_KEY')
     }
   stages {
     stage('Gitleak Check') {
