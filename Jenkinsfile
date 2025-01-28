@@ -89,7 +89,11 @@ pipeline {
       steps {
         container('zap') {
           sh """
-              # Create a unique temp directory for the ZAP home
+              # Unset any previous ZAP-related environment variables to avoid conflicts
+                unset ZAP_HOME
+                unset HOME
+
+                # Create a unique temp directory for ZAP home
                 export ZAP_HOME=/tmp/zap-home-\$(date +%s)  # Unique directory for this run
                 export HOME=\$ZAP_HOME  # Set the HOME variable to the new temp directory
 
