@@ -89,11 +89,19 @@ pipeline {
       steps {
         container('zap') {
           sh """
-              rm -rf /home/zap/.ZAP
-              export ZAP_PATH=/zap/zap.sh  # Ensure the correct path is set
-              \$ZAP_PATH -daemon -port 8080 &  # Start ZAP in daemon mode
-              sleep 10  # Wait for ZAP to initialize
-              \$ZAP_PATH -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}  # Run active scan
+              # Define a unique home directory based on timestamp to avoid conflicts
+                export ZAP_HOME=/tmp/zap-home-\$(date +%s)  # Create a unique temp directory
+                mkdir -p \$ZAP_HOME  # Make the directory
+                
+                export ZAP_PATH=/zap/zap.sh  # Ensure the correct path is set
+
+                # Start ZAP with the new, unique home directory
+                \$ZAP_PATH -daemon -port 8080 -home \$ZAP_HOME &
+
+                sleep 10  # Wait for ZAP to initialize
+
+                # Run the ZAP scan
+                \$ZAP_PATH -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
             """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
