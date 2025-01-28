@@ -11,30 +11,6 @@ pipeline {
         TARGET_URL = 'https://google.com'
     }
   stages {
-    stage('Owasp zap') {
-      agent {
-        kubernetes {
-          yaml zap()
-          showRawYaml false
-        }
-      }
-      steps {
-        container('zap') {
-          script {
-                sh """
-                    echo "Running the spider scan..."
-                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
-                    sleep 30
-
-                    echo "Running the active scan..."
-                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}  # Use the same home directory
-                """
-            }
-          archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
-        }
-      }
-    }
-
     stage('Gitleak Check') {
       agent {
         kubernetes {
@@ -52,7 +28,6 @@ pipeline {
         }
       }
     }
-
     stage('Owasp Dependency Check') {
       agent {
         kubernetes {
@@ -80,7 +55,6 @@ pipeline {
         }
       }
     }
-
     stage('Semgrep Scan') {
       agent {
         kubernetes {
@@ -105,7 +79,23 @@ pipeline {
         }
       }
     }
-    
+    stage('Owasp zap') {
+      agent {
+        kubernetes {
+          yaml zap()
+          showRawYaml false
+        }
+      }
+      steps {
+        container('zap') {
+          sh """
+              /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
+              /zap/zap.sh -cmd shutdown
+              """
+          archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+        }
+      }
+    }
     stage('Maven Build') {
       agent {
         kubernetes {
