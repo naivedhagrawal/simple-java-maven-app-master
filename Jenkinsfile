@@ -28,7 +28,7 @@ pipeline {
     stage('Owasp Dependency Check') {
       agent {
         kubernetes {
-          yaml pod('owasp','owasp/dependency-check-action:latest')
+          yaml pod('owasp','owasp/dependency-check:latest')
           showRawYaml false
         }
       }
@@ -36,7 +36,8 @@ pipeline {
         container('owasp') {
           sh """
             ls -al /usr/local/bin/
-            dependency-check.sh --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
+            which dependency-check || echo 'Dependency-Check not found'
+            dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
         }
