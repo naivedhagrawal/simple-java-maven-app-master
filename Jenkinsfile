@@ -4,20 +4,22 @@ k8sPipeline([
     [
         name: 'Build',
         gitUrl: 'https://github.com/myorg/myproject.git',
-        branch: 'feature/build-optimization', // Specify branch (optional)
+        branch: 'feature/build-optimization',
         podImage: 'my-build-image',
         podImageVersion: 'v1.0.0',
+        podTemplate: 'dindPodTemplate.yaml', // Use the dind pod template
         steps: [
-            'echo "Building application..."',
-            './build.sh'
+            'echo "Building application with Docker..."',
+            'docker build -t my-app .'
         ]
     ],
     [
         name: 'Test',
         gitUrl: 'https://github.com/myorg/myproject.git',
-        branch: 'develop', // Specify a different branch
+        branch: 'develop',
         podImage: 'my-test-image',
         podImageVersion: 'v1.1.0',
+        // Default pod template (no dind)
         steps: [
             'echo "Running tests..."',
             './run-tests.sh'
@@ -26,7 +28,6 @@ k8sPipeline([
     [
         name: 'Deploy',
         gitUrl: 'https://github.com/myorg/myproject.git',
-        // No branch specified; defaults to 'main'
         podImage: 'my-deploy-image',
         podImageVersion: 'v2.0.0',
         steps: [
