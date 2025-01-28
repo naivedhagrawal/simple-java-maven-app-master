@@ -42,6 +42,14 @@ pipeline {
               dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
+          script {
+              def owaspReport = readJSON file: "${env.OWASP_DEP_REPORT}"
+              def highSeverityVulnerabilities = owaspReport.findAll { it.severity == 'High' }.size()
+
+              if (highSeverityVulnerabilities > 0) {
+                error "Build failed due to high severity vulnerabilities in dependencies."
+              }
+            }
           }
         }
       }
@@ -59,6 +67,14 @@ pipeline {
             semgrep --config=auto --output ${env.SEMGREP_REPORT} .
           """
           archiveArtifacts artifacts: "${env.SEMGREP_REPORT}", allowEmptyArchive: true
+          script {
+            def semgrepReport = readJSON file: "${env.SEMGREP_REPORT}"
+            def criticalIssues = semgrepReport.findAll { it.severity == 'ERROR' }.size()
+            
+            if (criticalIssues > 0) {
+              error "Build failed due to critical Semgrep issues."
+            }
+          }
         }
       }
     }
