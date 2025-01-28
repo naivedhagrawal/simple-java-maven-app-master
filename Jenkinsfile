@@ -6,28 +6,30 @@ def defaultBranch = 'main'
 k8sPipeline([
     [
         name: 'Build',
-        podTemplate: 'dindPodTemplate.yaml', // Use the DinD template
+        podImage: 'docker', // This is still needed even with DinD, for the agent container
+        podImageVersion: 'latest', // Version for the agent container
+        podTemplate: 'dindPodTemplate.yaml',
         steps: [
             'echo "Building application with Docker..."',
-            'docker version', // Corrected command
-            'docker build -t my-java-app .', // Example build command
-            'docker save my-java-app -o my-java-app.tar' // Example: save the image
+            'docker version',
+            'docker build -t my-java-app .',
+            'docker save my-java-app -o my-java-app.tar' // If you need to save the image
         ]
     ],
     [
         name: 'Test',
-        podImage: 'maven',
-        podImageVersion: 'latest',
+        podImage: 'maven',  // Required
+        podImageVersion: 'latest', // Required
         steps: [
             'echo "Running tests..."',
             'mvn -version',
-            'mvn test' // Example test command
+            'mvn test'
         ]
     ],
     [
         name: 'Deploy',
-        podImage: 'python',
-        podImageVersion: 'latest',
+        podImage: 'python', // Required
+        podImageVersion: 'latest', // Required
         steps: [
             'echo "Deploying application..."',
             'python -version' // Replace with your deployment script
