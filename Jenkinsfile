@@ -21,27 +21,21 @@ pipeline {
       steps {
         container('zap') {
           script {
-              // Start ZAP in daemon mode
-              // sh """
-              //   /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session
-              // """
-              // // Wait for ZAP to fully initialize
-              // sleep 60
+                sh """
+                    pkill -f "/zap/zap.sh -daemon"  # Kill any existing ZAP daemons
+                    sleep 5
+                    mkdir -p /tmp/zap-home-${BUILD_NUMBER} # Unique home directory
+                    /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session -home /tmp/zap-home-${BUILD_NUMBER}
+                    sleep 60
 
-              // Run the spider scan
-              sh """
-                echo "Running the spider scan..."
-                /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
-              """
-              // Wait for the spider scan to complete
-              sleep 30
+                    echo "Running the spider scan..."
+                    /zap/zap.sh -cmd spider -url ${env.TARGET_URL}
+                    sleep 30
 
-              // Run the active scan
-              sh """
-                echo "Running the active scan..."
-                /zap/zap.sh -cmd -config scanner.attackOnStart=true activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
-        """
-      }
+                    echo "Running the active scan..."
+                    /zap/zap.sh -cmd -config scanner.attackOnStart=false activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -home /tmp/zap-home-${BUILD_NUMBER}  # Use the same home directory
+                """
+            }
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
