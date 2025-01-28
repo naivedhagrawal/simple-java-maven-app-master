@@ -36,7 +36,7 @@ pipeline {
         container('owasp') {
           sh """
             ls -al /usr/local/bin/
-            dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
+            /bin/dependency-check.sh --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
         }
