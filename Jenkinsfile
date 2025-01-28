@@ -7,6 +7,7 @@ pipeline {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
         ZAP_REPORT = 'zap-report.json'
+        SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
     }
   stages {
@@ -42,6 +43,22 @@ pipeline {
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
           }
+        }
+      }
+    }
+    stage('Semgrep Scan') {
+      agent {
+        kubernetes {
+          yaml pod('semgrep','returntocorp/semgrep:latest')
+          showRawYaml false
+        }
+      }
+      steps {
+        container('semgrep') {
+          sh """
+            semgrep --config=auto --output ${env.SEMGREP_REPORT} .
+          """
+          archiveArtifacts artifacts: "${env.SEMGREP_REPORT}", allowEmptyArchive: true
         }
       }
     }
