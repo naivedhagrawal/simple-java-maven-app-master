@@ -35,9 +35,6 @@ pipeline {
       steps {
         container('owasp') {
           sh """
-              echo "Working directory: $(pwd)"
-              ls -l /usr/bin/dependency-check 
-              dependency-check --version 
               dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
