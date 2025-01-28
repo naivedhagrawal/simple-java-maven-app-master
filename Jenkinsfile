@@ -88,20 +88,14 @@ pipeline {
       }
       steps {
         container('zap') {
-          script {
-                def zapHomeDir = "/tmp/zap-home-${UUID.randomUUID().toString()}"
-                echo "Using ZAP home directory: ${zapHomeDir}"
+          sh """
+              /zap/zap.sh -daemon -port 8080 -newsession &
 
-                // Start ZAP with a unique directory
-                sh """
-                    ${env.ZAP_PATH} -daemon -port 8080 -dir ${zapHomeDir} &
+              sleep 10  # Wait for ZAP to initialize
 
-                    sleep 10  # Wait for ZAP to initialize
-
-                    # Run the ZAP scan against the target URL
-                    ${env.ZAP_PATH} -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT} -dir ${zapHomeDir}
-                """
-            }
+              echo "Running the active scan..."
+              /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
+            """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
