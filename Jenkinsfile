@@ -93,6 +93,9 @@ pipeline {
                 export ZAP_HOME=/tmp/zap-home-\$(date +%s)  # Unique directory for this run
                 export HOME=\$ZAP_HOME  # Ensure HOME is also set to this unique directory
 
+                # Remove any existing ZAP home directory to prevent conflicts
+                rm -rf \$ZAP_HOME
+
                 # Ensure the directory exists
                 mkdir -p \$ZAP_HOME
 
