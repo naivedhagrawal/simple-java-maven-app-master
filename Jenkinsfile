@@ -22,7 +22,13 @@ pipeline {
         container('zap') {
           script {
                 sh """
-                    pkill -f "/zap/zap.sh -daemon"  # Kill any existing ZAP daemons
+                    echo "Processes before pkill:"
+                    ps aux
+                    pkill -f "/zap/zap.sh -daemon"
+                    echo "pkill exit code: \$?"
+                    sleep 5
+                    echo "Processes after pkill:"
+                    ps aux
                     sleep 5
                     mkdir -p /tmp/zap-home-${BUILD_NUMBER} # Unique home directory
                     /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session -home /tmp/zap-home-${BUILD_NUMBER}
