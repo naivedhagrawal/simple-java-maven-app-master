@@ -89,6 +89,7 @@ pipeline {
       steps {
         container('zap') {
           sh """
+              rm -rf /home/zap/.ZAP
               export ZAP_PATH=/zap/zap.sh  # Ensure the correct path is set
               \$ZAP_PATH -daemon -port 8080 &  # Start ZAP in daemon mode
               sleep 10  # Wait for ZAP to initialize
