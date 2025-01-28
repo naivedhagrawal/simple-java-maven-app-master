@@ -1,40 +1,36 @@
 @Library('k8s-shared-lib') _
 
-// Define the Git repository URL and default branch
 def gitUrl = 'https://github.com/naivedhagrawal/simple-java-maven-app-master.git'
 def defaultBranch = 'main'
 
 k8sPipeline([
-    // Build stage that requires Docker functionality (uses dindPodTemplate.yaml)
     [
         name: 'Build',
-        podImage: 'docker',  // Pod image to use for this stage
-        podImageVersion: 'latest',  // Version of the image
-        podTemplate: 'dindPodTemplate.yaml',  // Use the Docker-in-Docker pod template
+        podTemplate: 'dindPodTemplate.yaml', // Use the DinD template
         steps: [
             'echo "Building application with Docker..."',
-            'docker -version'  // Build the Docker image
+            'docker version', // Corrected command
+            'docker build -t my-java-app .', // Example build command
+            'docker save my-java-app -o my-java-app.tar' // Example: save the image
         ]
     ],
-    // Test stage without Docker-in-Docker
     [
         name: 'Test',
         podImage: 'maven',
         podImageVersion: 'latest',
-        // Default pod template (no dind)
         steps: [
             'echo "Running tests..."',
-            'mvn -version'  // Run tests with shell script
+            'mvn -version',
+            'mvn test' // Example test command
         ]
     ],
-    // Deploy stage without Docker-in-Docker
     [
         name: 'Deploy',
         podImage: 'python',
         podImageVersion: 'latest',
         steps: [
             'echo "Deploying application..."',
-            'python -version'  // Deploy the application
+            'python -version' // Replace with your deployment script
         ]
     ]
 ], gitUrl, defaultBranch)
