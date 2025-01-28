@@ -19,9 +19,8 @@ pipeline {
           sh """
               gitleaks version
               gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT}
-              archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}", allowEmptyArchive: true
-
           """
+          archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}", allowEmptyArchive: true
         }
       }
     }
