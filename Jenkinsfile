@@ -22,11 +22,11 @@ pipeline {
         container('zap') {
           script {
               // Start ZAP in daemon mode
-              sh """
-                /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session
-              """
-              // Wait for ZAP to fully initialize
-              sleep 60
+              // sh """
+              //   /zap/zap.sh -daemon -port 8080 -config api.disablekey=true -newsession /tmp/zap-session
+              // """
+              // // Wait for ZAP to fully initialize
+              // sleep 60
 
               // Run the spider scan
               sh """
