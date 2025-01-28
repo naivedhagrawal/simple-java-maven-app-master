@@ -35,8 +35,8 @@ pipeline {
       steps {
         container('owasp') {
           sh """
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v12.0.1/dependency-check-12.0.1-release.zip
-          unzip dependency-check-12.0.1-release.zip -d /opt
+          wget https://github.com/jeremydmiller/DependencyCheck/releases/download/v7.3.0/dependency-check-7.3.0-release.zip
+          unzip dependency-check-7.3.0-release.zip -d /opt
           /opt/dependency-check/bin/dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
