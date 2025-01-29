@@ -21,9 +21,6 @@ pipeline {
             steps {
             container('zap') {
                 sh """
-                    echo 'Listing /zap/output directory contents:'
-                    ls -l /zap/output
-                    
                     zap-baseline.py -t ${TARGET_URL} -J /zap/output/zap_out.json
                 """
             }
