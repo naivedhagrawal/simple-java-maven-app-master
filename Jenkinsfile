@@ -21,40 +21,7 @@ pipeline {
             steps {
                 container('docker') {
                     script {
-                        // Target URL for the scan
-                        def targetUrl = "https://google.com"
-
-                        // Output file path for results
-                        def outputFile = "/zap/wrk/zap-results.json"
-
-                        // Run the ZAP scan using Docker
-                        def zapContainer = "owasp/zap2docker-stable"
-                        def zapScript = "zap-baseline.py"
-                        def outputFormat = "json"
-
-                        // Command to run ZAP inside Docker
-                        def command = [
-                            "docker", "run", "-u", "zap", "-v", "/tmp:/zap/wrk/", zapContainer,
-                            zapScript, "-t", targetUrl, "--output-format", outputFormat, "--output-file", outputFile
-                        ]
-
-                        // Execute the command
-                        def process = command.execute()
-                        process.waitFor()
-
-                        // Check for success or failure
-                        if (process.exitValue() == 0) {
-                            println "ZAP scan completed successfully!"
-                        } else {
-                            println "ZAP scan failed. Check the error log."
-                        }
-
-                        // Optionally, retrieve and print the results (if required)
-                        def results = new File("/tmp/zap/wrk/zap-results.json")
-                        if (results.exists()) {
-                            println "Scan Results: " + results.text
-                        } else {
-                            println "No scan results found."
+                        docker run -u zap -v /tmp:/zap/wrk/ owasp/zap2docker-stable zap-baseline.py -t http://google.com
                         }
                     }
                 }
