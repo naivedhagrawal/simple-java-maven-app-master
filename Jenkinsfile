@@ -89,9 +89,12 @@ pipeline {
       steps {
         container('zap') {
           sh """
-              /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
+              mkdir -p /zap/workspace
+              /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
+              sleep 15  # Wait for ZAP to fully start
+              zap-cli quick-scan --self-contained --json -o ${env.ZAP_REPORT} ${env.TARGET_URL}
               /zap/zap.sh -cmd shutdown
-              """
+             """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
