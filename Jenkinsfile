@@ -21,7 +21,13 @@ pipeline {
             steps {
                 container('docker') {
                     script {
-                        docker run -u zap -v /tmp:/zap/wrk/ owasp/zap2docker-stable zap-baseline.py -t http://google.com
+                        def command = "docker run -u zap -v /tmp:/zap/wrk/ owasp/zap2docker-stable zap-baseline.py -t ${targetUrl}"
+
+                        // Execute the command
+                        def process = command.execute()
+
+                        // Wait for the process to finish and capture output
+                        process.waitFor()
                         }
                     }
                 }
