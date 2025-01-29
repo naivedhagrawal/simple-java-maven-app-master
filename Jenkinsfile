@@ -45,6 +45,7 @@ spec:
     echo "Attempting to scan URL: $TARGET_URL"
 
     # Run the scan on the provided URL
+    curl "https://google.com"
     curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
 
     # Wait for the scan to complete
