@@ -32,12 +32,17 @@ spec:
       steps {
         container('zap') {
           sh '''
-    mkdir -p /zap/workspace
+    # Start ZAP in daemon mode
     /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
-    sleep 15  # Wait for ZAP to fully start
 
-    # Directly using the environment variables with no interpolation
-    curl "http://localhost:8080/JSON/ascan/action/scan/?url=""$TARGET_URL""&recurse=true&inScopeOnly=false"
+    # Wait for ZAP to be fully ready
+    while ! curl -s http://localhost:8080/; do
+        echo "Waiting for ZAP to start..."
+        sleep 5
+    done
+
+    # Now that ZAP is ready, run the scan
+    curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
 
     # Wait for the scan to complete
     while true; do
