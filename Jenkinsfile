@@ -36,12 +36,8 @@ spec:
     /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
     sleep 15  # Wait for ZAP to fully start
 
-    # Using export to pass environment variables to the shell
-    export TARGET_URL="${env.TARGET_URL}"
-    export ZAP_REPORT="${env.ZAP_REPORT}"
-
-    # Start scan
-    curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
+    # Directly using the environment variables with no interpolation
+    curl "http://localhost:8080/JSON/ascan/action/scan/?url=""$TARGET_URL""&recurse=true&inScopeOnly=false"
 
     # Wait for the scan to complete
     while true; do
@@ -59,10 +55,6 @@ spec:
     # Shutdown ZAP
     /zap/zap.sh -cmd shutdown
 '''
-
-
-
-
 
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
