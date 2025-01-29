@@ -9,6 +9,7 @@ pipeline {
         ZAP_REPORT = 'zap-report.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
+        ZAP_API_URL = "http://localhost:8080"
     }
   stages {
     stage('Gitleak Check') {
@@ -88,11 +89,45 @@ pipeline {
       }
       steps {
         container('zap') {
-          sh """
-              /zap/zap.sh -cmd activeScan -url ${env.TARGET_URL} -format json -output ${env.ZAP_REPORT}
-              /zap/zap.sh -cmd shutdown
-              """
-          archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+          script {
+        // Use withCredentials to retrieve the ZAP API key from Jenkins Credentials
+        withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
+          
+          // Perform Active Scan via the API
+          def activeScanUrl = "${env.ZAP_API_URL}/JSON/ascan/action/scan"
+          def activeScanParams = [
+            url: env.TARGET_URL,
+            apikey: env.ZAP_API_KEY
+          ]
+          
+          // Trigger the active scan using ZAP API
+          def activeScanResponse = httpRequest(
+            url: activeScanUrl,
+            httpMode: 'POST',
+            query: activeScanParams,
+            validResponseCodes: '200'
+          )
+          echo "Active scan triggered: ${activeScanResponse}"
+          
+          // Wait for the scan to complete (you may want to adjust the sleep time)
+          sleep(time: 60, unit: 'SECONDS')  // Adjust sleep time based on your scan duration
+          
+          // Fetch the scan result in JSON format
+          def scanResultsUrl = "${env.ZAP_API_URL}/JSON/core/view/alerts"
+          def scanResults = httpRequest(
+            url: scanResultsUrl,
+            httpMode: 'GET',
+            query: [apikey: env.ZAP_API_KEY, baseurl: env.TARGET_URL],
+            validResponseCodes: '200'
+          )
+          
+          // Save the scan result to a file
+          writeFile file: "${env.ZAP_REPORT}", text: scanResults
+          
+          // Archive the ZAP report in JSON format
+              archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+            }
+          }
         }
       }
     }
