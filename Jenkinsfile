@@ -20,7 +20,7 @@ pipeline {
             }
             steps {
             container('docker') {
-                sh "docker run -u zap -v /tmp:/zap/wrk/ owasp/zap2docker-stable zap-baseline.py -t ${TARGET_URL}"
+                sh "docker run -u zap -v /tmp:/zap/wrk/ zaproxy/zap-stable:latest zap-baseline.py -t ${TARGET_URL}"
             }
             }
         }
