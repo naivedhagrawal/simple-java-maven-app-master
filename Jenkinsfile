@@ -24,7 +24,9 @@ pipeline {
           script {
                     // Use withCredentials to retrieve the ZAP API key from Jenkins Credentials
                     withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
-          
+                    
+                    sleep 60
+
                     // Perform Active Scan via the API
                     def activeScanUrl = "${env.ZAP_API_URL}/JSON/ascan/action/scan"
                     def activeScanParams = [
@@ -36,7 +38,7 @@ pipeline {
                     def activeScanResponse = httpRequest(
                       url: activeScanUrl,
                       httpMode: 'POST',
-                      query: activeScanParams,
+                      params: activeScanParams,
                       validResponseCodes: '200'
                     )
                     echo "Active scan triggered: ${activeScanResponse}"
