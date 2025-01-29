@@ -32,26 +32,34 @@ spec:
       steps {
         container('zap') {
           sh '''
-                mkdir -p /zap/workspace
-                /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
-                sleep 15  # Wait for ZAP to fully start
-                TARGET_URL="${env.TARGET_URL}"
-                ZAP_REPORT="${env.ZAP_REPORT}"
+    mkdir -p /zap/workspace
+    /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
+    sleep 15  # Wait for ZAP to fully start
 
-                curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
-                
-                while true; do
-                  STATUS=$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')
-                  if [ "$STATUS" = "100" ]; then
-                    break
-                  fi
-                  echo "Scanning in progress..."
-                  sleep 10
-                done
-                
-                curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o $ZAP_REPORT
-                /zap/zap.sh -cmd shutdown
-            '''
+    # Using export to pass environment variables to the shell
+    export TARGET_URL="${env.TARGET_URL}"
+    export ZAP_REPORT="${env.ZAP_REPORT}"
+
+    # Start scan
+    curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
+
+    # Wait for the scan to complete
+    while true; do
+      STATUS=$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')
+      if [ "$STATUS" = "100" ]; then
+        break
+      fi
+      echo "Scanning in progress..."
+      sleep 10
+    done
+
+    # Download the report
+    curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o "$ZAP_REPORT"
+
+    # Shutdown ZAP
+    /zap/zap.sh -cmd shutdown
+'''
+
 
 
 
