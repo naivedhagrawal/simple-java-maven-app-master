@@ -9,7 +9,7 @@ pipeline {
         ZAP_REPORT = 'zap-report.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
-        ZAP_API_URL = "http://localhost:8080"
+        ZAP_API_URL = "http://zap-service:8081"
     }
   stages {
     stage('Owasp zap') {
@@ -38,7 +38,7 @@ pipeline {
                     def activeScanResponse = httpRequest(
                       url: activeScanUrl,
                       httpMode: 'POST',
-                      params: activeScanParams,
+                      query: activeScanParams,
                       validResponseCodes: '200'
                     )
                     echo "Active scan triggered: ${activeScanResponse}"
