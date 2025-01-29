@@ -24,15 +24,15 @@ pipeline {
         container('zap') {
           script {
             withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
-                            // Construct ZAP API URL dynamically using Kubernetes service discovery
-                            def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}:9090" // Correct port
+              // Construct ZAP API URL dynamically using Kubernetes service discovery
+              def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}:9090" // Correct port
 
                             // Function to check ZAP scan status
                             def checkZapScanStatus(String zapApiUrl, String apiKey, String scanId) {
-                                def statusUrl = "${zapApiUrl}/JSON/ascan/view/status"
-                                def statusParams = [apikey: apiKey, scanId: scanId]
-
-                                try {
+                              def statusUrl = "${zapApiUrl}/JSON/ascan/view/status"
+                              def statusParams = [apikey: apiKey, scanId: scanId]
+              
+                              try {
                                     def statusResponse = httpRequest(
                                         url: statusUrl,
                                         httpMode: 'GET',
