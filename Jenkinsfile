@@ -7,11 +7,10 @@ pipeline {
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
         ZAP_REPORT = 'zap-report.json'
         SEMGREP_REPORT = 'semgrep-report.json'
-        TARGET_URL = 'https://google.com' // Consider making this a parameter
-        ZAP_SERVICE_NAME = 'zap-service'
-        ZAP_NAMESPACE = 'devops-tools'
-    }
-    stages {
+        TARGET_URL = 'https://google.com' // Consider making this a parameter        
+        }
+
+    stages {    
         stage('Owasp zap') {
             agent {
                 kubernetes {
@@ -21,59 +20,13 @@ pipeline {
             }
             steps {
                 container('zap') {
-                    script {
-                        withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
-                            def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}.svc.cluster.local:9090"
-
-                            // Now you can call the function here:
-                            def activeScanUrl = "${zapApiUrl}/JSON/ascan/action/scan"
-                            def activeScanParams = [url: env.TARGET_URL, apikey: env.ZAP_API_KEY]
-
-                            try {
-                                // ... (rest of your ZAP scan code - no changes needed here)
-                                def activeScanResponse = httpRequest(
-                                    url: activeScanUrl,
-                                    httpMode: 'POST',
-                                    query: activeScanParams,
-                                    validResponseCodes: '200'
-                                )
-                                def scanId = readJSON(text: activeScanResponse.content).scanid
-                                echo "Active scan triggered. Scan ID: ${scanId}"
-
-
-                                timeout(time: 60, unit: 'MINUTES') {
-                                    while (checkZapScanStatus(zapApiUrl, env.ZAP_API_KEY, scanId) != "100") {
-                                        sleep(time: 10, unit: 'SECONDS')
-                                    }
-                                }
-                                echo "ZAP Scan Complete!"
-
-                                def scanResultsUrl = "${zapApiUrl}/JSON/core/view/alerts"
-                                def scanResultsParams = [apikey: env.ZAP_API_KEY, baseurl: env.TARGET_URL]
-                                def scanResults = httpRequest(
-                                    url: scanResultsUrl,
-                                    httpMode: 'GET',
-                                    query: scanResultsParams,
-                                    validResponseCodes: '200'
-                                )
-                                writeFile file: "${env.ZAP_REPORT}", text: scanResults.content
-                                archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
-
-                            } catch (Exception e) {
-                                echo "Error during ZAP scan: ${e.message}"
-                                currentBuild.result = 'FAILURE'
-                                throw e
-                            }
-                        }
-                    }
+                    sh 'zap-cli quick-scan $TARGET_URL'
                 }
             }
         }
+        
 
-        // ... (Gitleak, OWASP, Semgrep stages - mostly good)
-
-        stage('Owasp Dependency Check') { // Improved OWASP stage
-            // ... (agent definition)
+        stage('Owasp Dependency Check') {
             steps {
                 container('owasp') {
                     withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
