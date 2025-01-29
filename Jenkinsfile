@@ -14,7 +14,7 @@ pipeline {
         stage('Owasp zap') {
             agent {
                 kubernetes {
-                    yaml pod() // Assuming this comes from your shared library and defines the ZAP pod
+                    yaml zap() // Assuming this comes from your shared library and defines the ZAP pod
                     showRawYaml false
                 }
             }
