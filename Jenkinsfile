@@ -14,13 +14,13 @@ pipeline {
         stage('Owasp zap') {
             agent {
             kubernetes {
-                yaml docker()
+                yaml zap('https://google.com')
                 showRawYaml false
             }
             }
             steps {
-            container('docker') {
-                sh "docker run -u zap -v /tmp:/zap/wrk/ zaproxy/zap-stable:latest zap-baseline.py -t ${TARGET_URL}"
+            container('zap') {
+                sh "ls /tmp"
             }
             }
         }
