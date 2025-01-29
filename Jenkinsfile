@@ -14,7 +14,18 @@ pipeline {
     stage('Owasp zap') {
       agent {
         kubernetes {
-          yaml zap()
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zap
+spec:
+  containers:
+  - name: zap
+    image: zaproxy/zap-stable
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /dev/null"]
+"""
           showRawYaml false
         }
       }
@@ -24,7 +35,12 @@ pipeline {
               mkdir -p /zap/workspace
               /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
               sleep 15  # Wait for ZAP to fully start
-              zap-cli quick-scan --self-contained --json -o ${env.ZAP_REPORT} ${env.TARGET_URL}
+              curl "http://localhost:8080/JSON/ascan/action/scan/?url=${env.TARGET_URL}&recurse=true&inScopeOnly=false"
+              while [ "$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')" != "100" ]; do
+                echo "Scanning in progress..."
+                sleep 10
+              done
+              curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o ${env.ZAP_REPORT}
               /zap/zap.sh -cmd shutdown
              """
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
@@ -32,11 +48,21 @@ pipeline {
       }
     }
 
-    
     stage('Gitleak Check') {
       agent {
         kubernetes {
-          yaml pod('gitleak','zricethezav/gitleaks')
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gitleak
+spec:
+  containers:
+  - name: gitleak
+    image: zricethezav/gitleaks
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /dev/null"]
+"""
           showRawYaml false
         }
       }
@@ -51,11 +77,21 @@ pipeline {
       }
     }
 
-
     stage('Owasp Dependency Check') {
       agent {
         kubernetes {
-          yaml pod('owasp','naivedh/owasp-dep:latest')
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: owasp
+spec:
+  containers:
+  - name: owasp
+    image: naivedh/owasp-dep:latest
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /dev/null"]
+"""
           showRawYaml false
         }
       }
@@ -66,25 +102,26 @@ pipeline {
               dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
           """
           archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
-          // script {
-          //     def owaspReport = readJSON file: "${env.OWASP_DEP_REPORT}"
-          //     echo "OWASP Report: ${owaspReport}"  // Debugging line
-          //     def highSeverityVulnerabilities = owaspReport.findAll { it.severity == 'High' }.size()
-
-          //     if (highSeverityVulnerabilities > 0) {
-          //       error "Build failed due to high severity vulnerabilities in dependencies."
-          //     }
-          //   }
           }
         }
       }
     }
 
-
     stage('Semgrep Scan') {
       agent {
         kubernetes {
-          yaml pod('semgrep','returntocorp/semgrep:latest')
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: semgrep
+spec:
+  containers:
+  - name: semgrep
+    image: returntocorp/semgrep:latest
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /dev/null"]
+"""
           showRawYaml false
         }
       }
@@ -94,26 +131,25 @@ pipeline {
             semgrep --config=auto --output ${env.SEMGREP_REPORT} .
           """
           archiveArtifacts artifacts: "${env.SEMGREP_REPORT}", allowEmptyArchive: true
-          // script {
-          //   def semgrepReport = readJSON file: "${env.SEMGREP_REPORT}"
-          //   def criticalIssues = semgrepReport.findAll { it.severity == 'ERROR' }.size()
-            
-          //   if (criticalIssues > 0) {
-          //     error "Build failed due to critical Semgrep issues."
-          //   }
-          // }
         }
       }
     }
 
-
-    
-
-
     stage('Maven Build') {
       agent {
         kubernetes {
-          yaml pod('maven','maven:latest')
+          yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: maven
+spec:
+  containers:
+  - name: maven
+    image: maven:latest
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /dev/null"]
+"""
           showRawYaml false
         }
       }
