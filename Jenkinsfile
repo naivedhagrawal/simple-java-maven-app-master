@@ -9,7 +9,7 @@ pipeline {
         ZAP_REPORT = 'zap-report.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
-        ZAP_API_URL = "http://zap-service.default.svc.cluster.local:8081"
+        ZAP_API_URL = "http://zap-service.devops-tools.svc.cluster.local:8081"
     }
   stages {
     stage('Owasp zap') {
