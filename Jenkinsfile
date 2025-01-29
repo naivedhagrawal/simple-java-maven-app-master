@@ -14,7 +14,7 @@ pipeline {
         stage('Owasp zap') {
             agent {
             kubernetes {
-                yaml zap('https://google.com')
+                yaml zap()
                 showRawYaml false
             }
             }
