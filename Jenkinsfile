@@ -36,13 +36,14 @@ spec:
               /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
               sleep 15  # Wait for ZAP to fully start
               curl "http://localhost:8080/JSON/ascan/action/scan/?url=\${env.TARGET_URL}&recurse=true&inScopeOnly=false"
-              while [ "$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')" != "100" ]; do
+              while [ "\$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')" != "100" ]; do
                 echo "Scanning in progress..."
                 sleep 10
               done
               curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o \${env.ZAP_REPORT}
               /zap/zap.sh -cmd shutdown
-             """
+            """
+
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
       }
