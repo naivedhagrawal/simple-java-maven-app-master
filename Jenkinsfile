@@ -11,6 +11,28 @@ pipeline {
         TARGET_URL = 'https://google.com'
     }
   stages {
+    stage('Owasp zap') {
+      agent {
+        kubernetes {
+          yaml zap()
+          showRawYaml false
+        }
+      }
+      steps {
+        container('zap') {
+          sh """
+              mkdir -p /zap/workspace
+              /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
+              sleep 15  # Wait for ZAP to fully start
+              zap-cli quick-scan --self-contained --json -o ${env.ZAP_REPORT} ${env.TARGET_URL}
+              /zap/zap.sh -cmd shutdown
+             """
+          archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+        }
+      }
+    }
+
+    
     stage('Gitleak Check') {
       agent {
         kubernetes {
@@ -28,6 +50,8 @@ pipeline {
         }
       }
     }
+
+
     stage('Owasp Dependency Check') {
       agent {
         kubernetes {
@@ -55,6 +79,8 @@ pipeline {
         }
       }
     }
+
+
     stage('Semgrep Scan') {
       agent {
         kubernetes {
@@ -79,26 +105,11 @@ pipeline {
         }
       }
     }
-    stage('Owasp zap') {
-      agent {
-        kubernetes {
-          yaml zap()
-          showRawYaml false
-        }
-      }
-      steps {
-        container('zap') {
-          sh """
-              mkdir -p /zap/workspace
-              /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
-              sleep 15  # Wait for ZAP to fully start
-              zap-cli quick-scan --self-contained --json -o ${env.ZAP_REPORT} ${env.TARGET_URL}
-              /zap/zap.sh -cmd shutdown
-             """
-          archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
-        }
-      }
-    }
+
+
+    
+
+
     stage('Maven Build') {
       agent {
         kubernetes {
