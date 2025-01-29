@@ -9,7 +9,6 @@ pipeline {
         ZAP_REPORT = 'zap-report.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
-        ZAP_API_URL = "http://zap-service.devops-tools.svc.cluster.local:8081"
         ZAP_SERVICE_NAME = 'zap-service' // Name of your ZAP service
         ZAP_NAMESPACE = 'devops-tools' // Namespace of your ZAP service
     }
