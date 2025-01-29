@@ -25,14 +25,12 @@ pipeline {
                         withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
                             def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}:9090"
 
-                            def checkZapScanStatus(String zapApiUrl, String apiKey, String scanId) {
-                                // ... (This function is good as is)
-                            }
-
+                            // Now you can call the function here:
                             def activeScanUrl = "${zapApiUrl}/JSON/ascan/action/scan"
                             def activeScanParams = [url: env.TARGET_URL, apikey: env.ZAP_API_KEY]
 
                             try {
+                                // ... (rest of your ZAP scan code - no changes needed here)
                                 def activeScanResponse = httpRequest(
                                     url: activeScanUrl,
                                     httpMode: 'POST',
@@ -42,8 +40,8 @@ pipeline {
                                 def scanId = readJSON(text: activeScanResponse.content).scanid
                                 echo "Active scan triggered. Scan ID: ${scanId}"
 
-                                // Poll for scan completion with timeout
-                                timeout(time: 60, unit: 'MINUTES') { // Set a reasonable timeout
+
+                                timeout(time: 60, unit: 'MINUTES') {
                                     while (checkZapScanStatus(zapApiUrl, env.ZAP_API_KEY, scanId) != "100") {
                                         sleep(time: 10, unit: 'SECONDS')
                                     }
