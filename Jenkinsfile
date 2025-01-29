@@ -31,39 +31,42 @@ spec:
       }
       steps {
         container('zap') {
-          sh '''
-    # Start ZAP in daemon mode
-    /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
+          sh """
+                # Create workspace directory
+                mkdir -p /zap/workspace
+                
+                # Install jq to parse JSON
+                apt-get update && apt-get install -y jq
 
-    # Wait for ZAP to be fully ready
-    while ! curl -s http://localhost:8080/; do
-        echo "Waiting for ZAP to start..."
-        sleep 5
-    done
+                # Start ZAP in daemon mode
+                /zap/zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true -config dirs.base=/zap/workspace &
 
-    # Debug output for the URL
-    echo "Attempting to scan URL: $TARGET_URL"
+                # Wait for ZAP to fully start
+                echo "Waiting for ZAP to start..."
+                sleep 30  # Increased wait time
 
-    # Run the scan on the provided URL
-    curl "https://google.com"
-    curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
+                # Add URL to ZAP context
+                echo "Adding URL to ZAP context: ${env.TARGET_URL}"
+                curl "http://localhost:8080/JSON/core/action/accessUrl/?url=${env.TARGET_URL}"
 
-    # Wait for the scan to complete
-    while true; do
-      STATUS=$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')
-      if [ "$STATUS" = "100" ]; then
-        break
-      fi
-      echo "Scanning in progress..."
-      sleep 10
-    done
+                # Start the active scan
+                echo "Attempting to scan URL: ${env.TARGET_URL}"
+                curl "http://localhost:8080/JSON/ascan/action/scan/?url=${env.TARGET_URL}&recurse=true&inScopeOnly=false"
 
-    # Download the report
-    curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o "$ZAP_REPORT"
+                # Wait for the scan to complete
+                echo "Waiting for scan to complete..."
+                while [ "$(curl -s http://localhost:8080/JSON/ascan/view/status/ | jq -r '.status')" != "100" ]; do
+                    echo "Scanning in progress..."
+                    sleep 10  # Check every 10 seconds
+                done
 
-    # Shutdown ZAP
-    /zap/zap.sh -cmd shutdown
-'''
+                # Download the scan report
+                echo "Scan complete, downloading the report..."
+                curl "http://localhost:8080/OTHER/core/other/jsonreport/" -o ${env.ZAP_REPORT}
+
+                # Shutdown ZAP
+                /zap/zap.sh -cmd shutdown
+            """
 
 
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
