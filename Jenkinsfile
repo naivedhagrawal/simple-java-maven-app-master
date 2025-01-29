@@ -20,7 +20,52 @@ pipeline {
             }
             steps {
                 container('zap') {
-                    sh 'zap-cli quick-scan $TARGET_URL'
+                    script {
+                        def targetUrl = env.TARGET_URL // Assuming TARGET_URL is defined as a Jenkins environment variable
+
+                        // 1. Start ZAP daemon (if not already running - best practice is to manage this separately)
+                        // This is generally handled outside of the pipeline in a Docker Compose setup or similar
+                        // sh 'docker run -d -p 8080:8080 -v zap_data:/zap/.ZAP_HOME zap-image zap -daemon -host 0.0.0.0'
+
+                        // 2. Get the ZAP API key (replace with your actual key or retrieve it if needed)
+                        def zapApiKey = env.ZAP_API_KEY ?: sh(returnStdout: true, script: 'cat /zap/.ZAP_HOME/config/apikey').trim()  // Retrieve if not in env
+
+                        // 3. Run the ZAP scan using the API (recommended approach)
+                        def zapApiUrl = "http://localhost:8080/JSON/core/action/scan" // Default ZAP API URL (adjust if needed)
+
+                        def response = httpRequest(
+                            url: zapApiUrl,
+                            httpMode: 'POST',
+                            requestBody: "apikey=${zapApiKey}&url=${targetUrl}&recurse=true", // Add recurse=true for recursive scan
+                            contentType: 'application/x-www-form-urlencoded', // Important for API calls
+                            timeout: 60000 // Timeout in milliseconds (adjust as needed)
+                        )
+
+                        // 4. Process the API response (e.g., check for errors, get scan ID)
+                        def responseJson = readJSON text: response.content
+
+                        if (responseJson.core.scan != null && responseJson.core.scan.id != null) {
+                            def scanId = responseJson.core.scan.id
+                            echo "ZAP scan started with ID: ${scanId}"
+
+                            // 5. (Optional) Poll for scan status (if needed)
+                            // You can use the scan ID to periodically check the scan status using the API:
+                            // http://localhost:8080/JSON/core/view/progress?apikey=<API_KEY>&scanId=<SCAN_ID>
+                            // ... (Add polling logic here)
+
+                        } else {
+                            echo "Error starting ZAP scan: ${response.content}"
+                            currentBuild.result = 'UNSTABLE' // Or 'FAILURE' depending on your needs
+                        }
+
+                        // 6. (Optional) Generate a report (after the scan completes)
+                        // You can use the ZAP API to generate different types of reports.
+                        // Example:
+                        // sh "curl -X GET 'http://localhost:8080/JSON/reports/action/generateReport?apikey=${zapApiKey}&type=html&fileName=/zap/report.html'"
+                        // Or using httpRequest:
+                        // ...
+
+                    }
                 }
             }
         }
