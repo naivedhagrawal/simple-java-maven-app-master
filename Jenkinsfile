@@ -41,7 +41,10 @@ spec:
         sleep 5
     done
 
-    # Now that ZAP is ready, run the scan
+    # Debug output for the URL
+    echo "Attempting to scan URL: $TARGET_URL"
+
+    # Run the scan on the provided URL
     curl "http://localhost:8080/JSON/ascan/action/scan/?url=$TARGET_URL&recurse=true&inScopeOnly=false"
 
     # Wait for the scan to complete
@@ -60,6 +63,7 @@ spec:
     # Shutdown ZAP
     /zap/zap.sh -cmd shutdown
 '''
+
 
           archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
         }
