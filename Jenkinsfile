@@ -10,6 +10,8 @@ pipeline {
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://google.com'
         ZAP_API_URL = "http://zap-service.devops-tools.svc.cluster.local:8081"
+        ZAP_SERVICE_NAME = 'zap-service' // Name of your ZAP service
+        ZAP_NAMESPACE = 'devops-tools' // Namespace of your ZAP service
     }
   stages {
     stage('Owasp zap') {
@@ -22,44 +24,69 @@ pipeline {
       steps {
         container('zap') {
           script {
-                    // Use withCredentials to retrieve the ZAP API key from Jenkins Credentials
-                    withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
-                    
-                    sleep 60
+            withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
+                            // Construct ZAP API URL dynamically using Kubernetes service discovery
+                            def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}:9090" // Correct port
 
-                    // Perform Active Scan via the API
-                    def activeScanUrl = "${env.ZAP_API_URL}/JSON/ascan/action/scan"
-                    def activeScanParams = [
-                      url: env.TARGET_URL,
-                      apikey: env.ZAP_API_KEY
-                    ]
-                    
-                    // Trigger the active scan using ZAP API
-                    def activeScanResponse = httpRequest(
-                      url: activeScanUrl,
-                      httpMode: 'POST',
-                      query: activeScanParams,
-                      validResponseCodes: '200'
-                    )
-                    echo "Active scan triggered: ${activeScanResponse}"
-                    
-                    // Wait for the scan to complete (you may want to adjust the sleep time)
-                    sleep(time: 60, unit: 'SECONDS')  // Adjust sleep time based on your scan duration
-                    
-                    // Fetch the scan result in JSON format
-                    def scanResultsUrl = "${env.ZAP_API_URL}/JSON/core/view/alerts"
-                    def scanResults = httpRequest(
-                      url: scanResultsUrl,
-                      httpMode: 'GET',
-                      query: [apikey: env.ZAP_API_KEY, baseurl: env.TARGET_URL],
-                      validResponseCodes: '200'
-                    )
-                    
-                    // Save the scan result to a file
-                    writeFile file: "${env.ZAP_REPORT}", text: scanResults
-                    
-                    // Archive the ZAP report in JSON format
-              archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+                            // Function to check ZAP scan status
+                            def checkZapScanStatus(String zapApiUrl, String apiKey, String scanId) {
+                                def statusUrl = "${zapApiUrl}/JSON/ascan/view/status"
+                                def statusParams = [apikey: apiKey, scanId: scanId]
+
+                                try {
+                                    def statusResponse = httpRequest(
+                                        url: statusUrl,
+                                        httpMode: 'GET',
+                                        query: statusParams,
+                                        validResponseCodes: '200'
+                                    )
+
+                                    def statusJson = readJSON text: statusResponse.content
+                                    def scanStatus = statusJson.ascan.status
+                                    echo "ZAP Scan Status: ${scanStatus}"
+                                    return scanStatus
+                                } catch (Exception e) {
+                                    echo "Error checking ZAP status: ${e.message}"
+                                    return "-1" // Indicate an error
+                                }
+                            }
+
+                            // Trigger Active Scan
+                            def activeScanUrl = "${zapApiUrl}/JSON/ascan/action/scan"
+                            def activeScanParams = [url: env.TARGET_URL, apikey: env.ZAP_API_KEY]
+
+                            try {
+                                def activeScanResponse = httpRequest(
+                                    url: activeScanUrl,
+                                    httpMode: 'POST',
+                                    query: activeScanParams,
+                                    validResponseCodes: '200'
+                                )
+                                def scanId = readJSON(text: activeScanResponse.content).scanid // Extract scan ID
+                                echo "Active scan triggered. Scan ID: ${scanId}"
+
+                                // Poll for scan completion
+                                while (checkZapScanStatus(zapApiUrl, env.ZAP_API_KEY, scanId) != "100") {
+                                    sleep(time: 10, unit: 'SECONDS')
+                                }
+                                echo "ZAP Scan Complete!"
+
+                                // Fetch and save scan results
+                                def scanResultsUrl = "${zapApiUrl}/JSON/core/view/alerts"
+                                def scanResultsParams = [apikey: env.ZAP_API_KEY, baseurl: env.TARGET_URL]
+                                def scanResults = httpRequest(
+                                    url: scanResultsUrl,
+                                    httpMode: 'GET',
+                                    query: scanResultsParams,
+                                    validResponseCodes: '200'
+                                )
+                                writeFile file: "${env.ZAP_REPORT}", text: scanResults.content
+                                archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+
+                            } catch (Exception e) {
+                                echo "Error during ZAP scan: ${e.message}"
+                                currentBuild.result = 'FAILURE' // Fail the build
+                                throw e // Stop the pipeline
             }
           }
         }
