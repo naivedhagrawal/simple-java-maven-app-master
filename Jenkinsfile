@@ -82,14 +82,15 @@ pipeline {
                                 writeFile file: "${env.ZAP_REPORT}", text: scanResults.content
                                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
 
-                            } catch (Exception e) {
-                                echo "Error during ZAP scan: ${e.message}"
-                                currentBuild.result = 'FAILURE' // Fail the build
-                                throw e // Stop the pipeline
+                        } catch (Exception e) {
+                            echo "Error during ZAP scan: ${e.message}"
+                            currentBuild.result = 'FAILURE' // Fail the build
+                            throw e // Stop the pipeline
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
 
 
