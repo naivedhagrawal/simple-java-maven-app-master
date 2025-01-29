@@ -23,7 +23,7 @@ pipeline {
                 container('zap') {
                     script {
                         withCredentials([string(credentialsId: 'ZAP_API_KEY', variable: 'ZAP_API_KEY')]) {
-                            def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}.${env.ZAP_NAMESPACE}:9090"
+                            def zapApiUrl = "http://${env.ZAP_SERVICE_NAME}:9090"
 
                             // Now you can call the function here:
                             def activeScanUrl = "${zapApiUrl}/JSON/ascan/action/scan"
