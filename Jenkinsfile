@@ -24,7 +24,6 @@ pipeline {
                 sh """
                     touch /home/zap/test.json
                     touch /zap/wrk/test.json
-                    touch /home/zap/zap_out.json
                     ls -lrt /home/zap/
                     ls -lrt /zap
                     ls -lrt /zap/wrk
