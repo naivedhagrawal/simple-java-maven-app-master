@@ -20,7 +20,10 @@ pipeline {
             }
             steps {
             container('zap') {
+                // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py
                 sh """
+                    touch /home/zap/test.json
+                    ls /home/zap
                     ls /zap
                     zap-baseline.py -t ${TARGET_URL}
                 """
