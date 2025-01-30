@@ -25,8 +25,9 @@ pipeline {
                     touch /home/zap/test.json
                     ls /home/zap
                     ls /zap
-                    zap-baseline.py -t ${TARGET_URL}
+                    zap-baseline.py -t ${TARGET_URL} -J ${ZAP_REPORT}
                 """
+                archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
             }
         }
