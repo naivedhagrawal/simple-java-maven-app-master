@@ -5,7 +5,7 @@ pipeline {
     environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        ZAP_REPORT = 'zap-report.json'
+        ZAP_REPORT = 'zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://www.eicar.org/'
         }
@@ -20,10 +20,10 @@ pipeline {
             }
             steps {
             container('zap') {
-                // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py -J ${ZAP_REPORT}
+                // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py
                 sh """
                     sleep 30
-                    zap-baseline.py -t ${TARGET_URL} -g gen.json -r zap-out.json
+                    zap-baseline.py -t ${TARGET_URL} -g gen.json -r ${ZAP_REPORT}
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
