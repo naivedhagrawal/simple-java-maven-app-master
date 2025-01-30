@@ -24,7 +24,7 @@ pipeline {
                 sh """
                     sleep 30
                     ls -lrt /zap
-                    zap-baseline.py -t ${TARGET_URL} -g gen.json -r ${ZAP_REPORT}
+                    zap-baseline.py -t ${TARGET_URL}
             
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
