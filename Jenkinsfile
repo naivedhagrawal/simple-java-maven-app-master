@@ -22,7 +22,8 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    sleep 30
+                    /zap/zap.sh -daemon &
+                    timeout 60 sh -c 'while ! curl --fail http://localhost:8080/health; do sleep 5; done'
                     zap-baseline.py -t ${TARGET_URL} -g gen.json -r ${ZAP_REPORT}
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
