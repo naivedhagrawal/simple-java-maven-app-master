@@ -7,7 +7,7 @@ pipeline {
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
         ZAP_REPORT = 'zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
-        TARGET_URL = 'https://google.com/'
+        TARGET_URL = 'http://www.itsecgames.com/'
         }
 
         stages {    
