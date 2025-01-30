@@ -23,7 +23,7 @@ pipeline {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     sleep 30
-                    ls -lrt
+                    ls -lrt /zap
                     zap-baseline.py -t ${TARGET_URL} -g gen.json -r ${ZAP_REPORT}
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
