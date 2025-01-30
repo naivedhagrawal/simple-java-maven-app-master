@@ -21,7 +21,7 @@ pipeline {
             steps {
             container('zap') {
                 sh """
-                    zap-baseline.py -t ${TARGET_URL}
+                    /zap/zap-baseline.py -t ${TARGET_URL}
                 """
             }
             }
