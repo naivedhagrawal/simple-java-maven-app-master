@@ -20,10 +20,10 @@ pipeline {
             }
             steps {
             container('zap') {
-                // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py
+                // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py -g gen.json -r ${ZAP_REPORT}
                 sh """
                     sleep 30
-                    zap-baseline.py -t ${TARGET_URL} -g gen.json -r ${ZAP_REPORT}
+                    zap-baseline.py -t ${TARGET_URL}
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
