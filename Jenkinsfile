@@ -14,12 +14,12 @@ pipeline {
         stage('Owasp zap') {
             agent {
             kubernetes {
-                yaml zap()
+                yaml docker()
                 showRawYaml false
             }
             }
             steps {
-            container('zap') {
+            container('docker') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     sleep 30
