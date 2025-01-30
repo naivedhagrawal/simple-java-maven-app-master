@@ -22,7 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    /zap/zap.sh -daemon
+                    sleep 30
                     zap-cli start
                     zap-cli status
                     zap-cli quick-scan ${TARGET_URL}
