@@ -23,7 +23,6 @@ pipeline {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py
                 sh """
                     touch /home/zap/test.json
-                    touch /zap/test.json
                     touch /zap/wrk/test.json
                     touch /home/zap/zap_out.json
                     ls -lrt /home/zap/
