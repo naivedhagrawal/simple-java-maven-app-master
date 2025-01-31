@@ -28,6 +28,7 @@ pipeline {
                     cat /zap/data/zap-out.json
                     echo "\$(cat /zap/wrk/zap-out.json)" > /zap/data/zap-out.json
                     cat /zap/data/zap-out.json
+                    ls -lrt /zap/data
                 """
                 archiveArtifacts artifacts: '/zap/data/zap-out.json', allowEmptyArchive: true
             }
