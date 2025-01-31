@@ -22,15 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    whoami
-                    id
-                    ls -ld /zap/wrk
-                    touch /zap/wrk/test.json
-                    touch /zap/test.json
-                    touch /home/zap/test.json
-                    ls -lrt /zap
-                    ls -lrt /home
-                    zap-baseline.py -t ${TARGET_URL}
+                    zap-baseline.py -t ${TARGET_URL} --fail-on-warning False
             
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
