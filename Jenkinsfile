@@ -7,7 +7,7 @@ pipeline {
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
         ZAP_REPORT = 'zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
-        TARGET_URL = 'https://juice-shop.herokuapp.com/'
+        TARGET_URL = 'http://itsecgames.com/'
         }
 
         stages {    
@@ -24,7 +24,7 @@ pipeline {
                 sh """
                     zap-baseline.py -t $TARGET_URL -J $ZAP_REPORT -l WARN -I
                 """
-                archiveArtifacts artifacts: '**/zap/wrk/*.json', allowEmptyArchive: true
+                archiveArtifacts artifacts: "${env.ZAP_REPORT}"
             }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
                         gitleaks version
                         gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT}
                     """
-                    archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}", allowEmptyArchive: true
+                    archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}"
                 }
             }
         }
@@ -58,7 +58,7 @@ pipeline {
                 sh """
                     dependency-check --scan . --format JSON --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
                 """
-                archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}", allowEmptyArchive: true
+                archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}"
 
                 // script {
                 //     def owaspReport = readJSON file: "${env.OWASP_DEP_REPORT}"
@@ -91,7 +91,7 @@ pipeline {
                 sh """
                 semgrep --config=auto --output ${env.SEMGREP_REPORT} .
                 """
-                archiveArtifacts artifacts: "${env.SEMGREP_REPORT}", allowEmptyArchive: true
+                archiveArtifacts artifacts: "${env.SEMGREP_REPORT}"
 
                 // script {
                 // def semgrepReport = readJSON file: "${env.SEMGREP_REPORT}"
