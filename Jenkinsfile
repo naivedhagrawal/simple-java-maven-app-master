@@ -29,7 +29,7 @@ pipeline {
                     touch /zap/test.json
                     touch /home/zap/test.json
                     ls -lrt /zap
-                    ls -lrt /homes
+                    ls -lrt /home
                     zap-baseline.py -t ${TARGET_URL}
             
                 """
