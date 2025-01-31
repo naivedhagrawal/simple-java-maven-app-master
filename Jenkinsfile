@@ -27,7 +27,9 @@ pipeline {
                 """
                 timeout(time: 10, unit: 'SECONDS') {
                     waitUntil {
-                        return fileExists('/zap/wrk/zap-out.json')
+                        script {
+                            return fileExists('/zap/wrk/zap-out.json')
+                        }
                     }
                 }
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
