@@ -25,13 +25,6 @@ pipeline {
                     zap-baseline.py -t ${TARGET_URL} -J ${env.ZAP_REPORT} -l WARN -I
                     ls -lrt /zap/wrk
                 """
-                timeout(time: 10, unit: 'SECONDS') {
-                    waitUntil {
-                        script {
-                            return fileExists('/zap/wrk/zap-out.json')
-                        }
-                    }
-                }
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
             }
