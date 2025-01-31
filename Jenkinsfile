@@ -14,7 +14,7 @@ pipeline {
         stage('Owasp zap') {
             agent {
             kubernetes {
-                yaml zap()
+                yaml pod('zap''naivedh/owasp-zap:latest')
                 showRawYaml false
             }
             }
