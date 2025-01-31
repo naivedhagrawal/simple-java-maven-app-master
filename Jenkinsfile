@@ -22,7 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    zap-baseline.py -t ${TARGET_URL} --fail-on-warning False
+                    zap-baseline.py -t ${TARGET_URL} -J ${ZAP_REPORT} -l WARN -I
             
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
