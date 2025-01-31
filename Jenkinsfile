@@ -24,7 +24,7 @@ pipeline {
                 sh """
                     zap-baseline.py -t $TARGET_URL -J $ZAP_REPORT -l WARN -I
                 """
-                archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+                archiveArtifacts artifacts: '**/zap/wrk/*.json', allowEmptyArchive: true
             }
             }
         }
