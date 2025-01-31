@@ -29,7 +29,7 @@ pipeline {
                     echo "\$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
                     cat /zap/wrk/data/zap-out.json
                 """
-                archiveArtifacts artifacts: "/zap/wrk/data/zap-out.json", allowEmptyArchive: true
+                archiveArtifacts artifacts: '/zap/wrk/data/zap-out.json', allowEmptyArchive: true
             }
             }
         }
