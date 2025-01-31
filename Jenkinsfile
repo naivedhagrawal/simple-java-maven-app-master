@@ -23,8 +23,13 @@ pipeline {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     zap-baseline.py -t ${TARGET_URL} -J ${env.ZAP_REPORT} -l WARN -I
-                    ls -lrt /zap/wrk        
+                    ls -lrt /zap/wrk
                 """
+                timeout(time: 10, unit: 'SECONDS') {
+                    waitUntil {
+                        return fileExists('/zap/wrk/zap-out.json')
+                    }
+                }
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
             }
