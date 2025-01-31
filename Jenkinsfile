@@ -24,12 +24,12 @@ pipeline {
                 sh """
                     zap-baseline.py -t $TARGET_URL -J /zap/wrk/zap-out.json -l WARN -I
                     ls -lrt /zap/wrk
-                    ls -lrt /zap/wrk/data
-                    cat /zap/wrk/data/zap-out.json
-                    echo "\$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
-                    cat /zap/wrk/data/zap-out.json
+                    ls -lrt /zap/data
+                    cat /zap/data/zap-out.json
+                    echo "\$(cat /zap/wrk/zap-out.json)" > /zap/data/zap-out.json
+                    cat /zap/data/zap-out.json
                 """
-                archiveArtifacts artifacts: '/zap/wrk/data/zap-out.json', allowEmptyArchive: true
+                archiveArtifacts artifacts: '/zap/data/zap-out.json', allowEmptyArchive: true
             }
             }
         }
