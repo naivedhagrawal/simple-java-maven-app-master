@@ -27,7 +27,7 @@ pipeline {
                     ls -lrt /home
                     ls -lrt /home/zap
                     ls -lrt /zap/wrk
-                    test -f ${env.ZAP_REPORT} && echo "Report file exists" || echo "Report file does not exist"         
+                    cat ${env.ZAP_REPORT}         
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
