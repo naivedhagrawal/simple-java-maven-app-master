@@ -51,6 +51,12 @@ pipeline {
             }
         }
         stage('Owasp Dependency Check') {
+            agent {
+                kubernetes {
+                    yaml pod('owasp','naivedh/owasp-dep:latest')
+                    showRawYaml false
+                }
+            }
             steps {
             container('owasp') {
                 withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
@@ -79,6 +85,12 @@ pipeline {
         }
 
         stage('Semgrep Scan') {
+            agent {
+                kubernetes {
+                    yaml pod('semgrep','returntocorp/semgrep')
+                    showRawYaml false
+                }
+            }
             steps {
             container('semgrep') {
                 sh """
@@ -105,6 +117,12 @@ pipeline {
         }
 
         stage('Maven Build') {
+            agent {
+                kubernetes {
+                    yaml pod('maven','maven:latest')
+                    showRawYaml false
+                }
+            }
             steps {
             container('maven') {
                 sh """
