@@ -27,6 +27,7 @@ pipeline {
                     ls -lrt /home
                     ls -lrt /home/zap
                     ls -lrt /zap/wrk
+                    cat /zap/wrk/zap-out.json
             
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
