@@ -22,7 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    zap-baseline.py -t '${TARGET_URL}' -J /zap/wrk/zap-out.json -l WARN -I
+                    zap-baseline.py -t ${TARGET_URL} -J -l WARN -I
                     ls -lrt /zap/wrk
                     touch /zap/wrk/data/zap-out.json
                     echo "$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
