@@ -24,7 +24,7 @@ pipeline {
                 sh """
                     whoami
                     id
-                    echo $USER
+                    ls -ld /zap/wrk
                     touch /zap/wrk/test.json
                     touch /zap/test.json
                     touch /home/zap/test.json
