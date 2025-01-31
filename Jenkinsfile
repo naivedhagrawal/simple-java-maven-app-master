@@ -22,6 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
+                    echo $USER
                     touch /zap/wrk/test.json
                     ls -lrt /zap
                     ls -lrt /home
