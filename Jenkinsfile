@@ -5,7 +5,7 @@ pipeline {
     environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        ZAP_REPORT = '/zap/wrk/data/zap-out.json'
+        ZAP_REPORT = '/zap/wrk/zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'http://www.itsecgames.com/'
         }
@@ -23,6 +23,8 @@ pipeline {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     zap-baseline.py -t ${TARGET_URL} -J ${env.ZAP_REPORT} -l WARN -I
+                    ls -lrt /zap/wrk
+                    cp /zap/wrk/zap-out.json /zap/wrk/data/zap-out.json
                     ls -lrt /zap/wrk/data
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
