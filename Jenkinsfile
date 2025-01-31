@@ -28,7 +28,7 @@ pipeline {
                     echo "$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
                     ls -lrt /zap/wrk/data
                 """
-                archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
+                archiveArtifacts artifacts: "/zap/wrk/data/zap-out.json", allowEmptyArchive: true
             }
             }
         }
