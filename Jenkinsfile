@@ -5,7 +5,7 @@ pipeline {
     environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        ZAP_REPORT = '/home/zap/zap-out.json'
+        ZAP_REPORT = '/zap/wrk/zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'http://www.itsecgames.com/'
         }
@@ -26,7 +26,8 @@ pipeline {
                     ls -lrt /zap
                     ls -lrt /home
                     ls -lrt /home/zap
-                    ls -lrt /zap/wrk            
+                    ls -lrt /zap/wrk
+                    test -f ${env.ZAP_REPORT} && echo "Report file exists" || echo "Report file does not exist"         
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
