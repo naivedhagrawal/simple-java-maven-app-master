@@ -24,8 +24,10 @@ pipeline {
                 sh """
                     echo $USER
                     touch /zap/wrk/test.json
+                    touch /zap/test.json
+                    touch /home/zap/test.json
                     ls -lrt /zap
-                    ls -lrt /home
+                    ls -lrt /homes
                     zap-baseline.py -t ${TARGET_URL}
             
                 """
