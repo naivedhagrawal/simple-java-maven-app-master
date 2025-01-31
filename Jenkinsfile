@@ -24,7 +24,7 @@ pipeline {
                 sh """
                     zap-baseline.py -t $TARGET_URL -J /zap/wrk/zap-out.json -l WARN -I
                     ls -lrt /zap/wrk
-                    echo "$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
+                    echo "\$(cat /zap/wrk/zap-out.json)" > /zap/wrk/data/zap-out.json
                     ls -lrt /zap/wrk/data
                 """
                 archiveArtifacts artifacts: "/zap/wrk/data/zap-out.json", allowEmptyArchive: true
