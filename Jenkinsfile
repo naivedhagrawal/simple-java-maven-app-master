@@ -32,7 +32,23 @@ pipeline {
             }
             }
         }
-        
+        stage('Gitleak Check') {
+            agent {
+                kubernetes {
+                    yaml pod('gitleak','zricethezav/gitleaks')
+                    showRawYaml false
+                }
+            }
+            steps {
+                container('gitleak') {
+                    sh """
+                        gitleaks version
+                        gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT}
+                    """
+                    archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}", allowEmptyArchive: true
+                }
+            }
+        }
         stage('Owasp Dependency Check') {
             steps {
             container('owasp') {
