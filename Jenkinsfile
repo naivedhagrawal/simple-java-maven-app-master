@@ -14,16 +14,17 @@ pipeline {
         stage('Owasp zap') {
             agent {
             kubernetes {
-                yaml docker()
+                yaml zap()
                 showRawYaml false
             }
             }
             steps {
-            container('docker') {
+            container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     sleep 30
                     ls -lrt /zap
+                    ls -lrt /home
                     zap-baseline.py -t ${TARGET_URL}
             
                 """
