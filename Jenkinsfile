@@ -5,7 +5,7 @@ pipeline {
     environment {
         GITLEAKS_REPORT = 'gitleaks-report.json'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
-        ZAP_REPORT = '/zap/wrk/zap-out.json'
+        ZAP_REPORT = '/zap/wrk/data/zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'http://www.itsecgames.com/'
         }
