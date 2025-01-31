@@ -22,6 +22,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
+                    echo $(whoami)
                     echo $USER
                     touch /zap/wrk/test.json
                     touch /zap/test.json
