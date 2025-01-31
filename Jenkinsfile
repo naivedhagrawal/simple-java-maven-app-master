@@ -24,8 +24,6 @@ pipeline {
                 sh """
                     whoami
                     id
-                    sudo chown -R zap:zap /zap/wrk
-                    sudo chmod -R 775 /zap/wrk
                     ls -ld /zap/wrk
                     touch /zap/wrk/test.json
                     touch /zap/test.json
