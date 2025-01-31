@@ -23,6 +23,7 @@ pipeline {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
                     zap-baseline.py -t ${TARGET_URL} -J ${env.ZAP_REPORT} -l WARN -I
+                    chomod 777 /zap/wrk/zap-out.json
                     ls -lrt /zap/wrk
                     cp /zap/wrk/zap-out.json /zap/wrk/data/zap-out.json
                     ls -lrt /zap/wrk/data
