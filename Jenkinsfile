@@ -22,12 +22,8 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    zap-baseline.py -t ${TARGET_URL} -J ${ZAP_REPORT} -l WARN -I
-                    ls -lrt /zap
-                    ls -lrt /home
-                    ls -lrt /home/zap
-                    ls -lrt /zap/wrk
-                    cat ${env.ZAP_REPORT}         
+                    zap-baseline.py -t ${TARGET_URL} -J ${env.ZAP_REPORT} -l WARN -I
+                    ls -lrt /zap/wrk        
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}", allowEmptyArchive: true
             }
