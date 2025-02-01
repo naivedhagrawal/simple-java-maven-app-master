@@ -3,7 +3,6 @@
 pipeline {
     agent none
     environment {
-        IST_DATE = ""
         GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
         OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
         ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
@@ -16,10 +15,14 @@ pipeline {
         stage('Set Date to IST') {
             steps {
                 script {
+                    // Get the current date in IST
                     def sdf = new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
                     sdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Kolkata"))
-                    IST_DATE = sdf.format(new Date())
+                    def IST_DATE = sdf.format(new Date())
                     echo "Timestamp in IST: ${IST_DATE}"
+
+                    // Setting the IST_DATE in environment variable
+                    env.IST_DATE = IST_DATE
                 }
             }
         }   
