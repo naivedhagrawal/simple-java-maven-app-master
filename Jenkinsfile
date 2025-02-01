@@ -3,14 +3,26 @@
 pipeline {
     agent none
     environment {
-        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
-        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
-        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
-        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
+        IST_DATE = ""
+        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
+        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
+        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
+        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
     }
 
-        stages {    
+    stages {    
+
+        stage('Set Date to IST') {
+            steps {
+                script {
+                    def sdf = new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
+                    sdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Kolkata"))
+                    IST_DATE = sdf.format(new Date())
+                    echo "Timestamp in IST: ${IST_DATE}"
+                }
+            }
+        }   
         
         stage('Gitleak Check') {
             agent {
