@@ -3,10 +3,10 @@
 pipeline {
     agent none
     environment {
-        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
-        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
-        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
-        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
+        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
+        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
+        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
+        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
     }
 
