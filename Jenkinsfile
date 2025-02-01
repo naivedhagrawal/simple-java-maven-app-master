@@ -3,13 +3,12 @@
 pipeline {
     agent none
     environment {
-        BUILD_TIMESTAMP = "${JOB_NAME}-${BUILD_NUMBER}-$(date +%Y%m%d%H%M%S)"
-        GITLEAKS_REPORT = "gitleaks-report-${BUILD_TIMESTAMP}.json"
-        OWASP_DEP_REPORT = "owasp-dep-report-${BUILD_TIMESTAMP}.json"
-        ZAP_REPORT = "zap-out-${BUILD_TIMESTAMP}.json"
-        SEMGREP_REPORT = "semgrep-report-${BUILD_TIMESTAMP}.json"
+        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
+        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
+        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
+        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${currentBuild.getTime()}.json"
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
-        }
+    }
 
         stages {    
         
