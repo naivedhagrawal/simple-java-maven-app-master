@@ -3,6 +3,9 @@
 pipeline {
     agent none
     environment {
+        IST_DATE = new java.text.SimpleDateFormat('yyyy-MM-dd_HH-mm-ss').apply {
+            setTimeZone(java.util.TimeZone.getTimeZone('Asia/Kolkata'))
+        }.format(new Date())
         GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
         OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
         ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${new Date().format('yyyy-MM-dd_HH-mm-ss')}.json"
