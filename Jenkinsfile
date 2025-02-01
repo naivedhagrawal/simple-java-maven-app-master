@@ -3,10 +3,6 @@
 pipeline {
     agent none
     environment {
-        GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
-        OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
-        ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
-        SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${IST_DATE}.json"
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
     }
 
@@ -23,6 +19,12 @@ pipeline {
 
                     // Setting the IST_DATE in environment variable
                     env.IST_DATE = IST_DATE
+
+                    // Dynamically setting the report filenames
+                    env.GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
+                    env.OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
+                    env.ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
+                    env.SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
                 }
             }
         }   
