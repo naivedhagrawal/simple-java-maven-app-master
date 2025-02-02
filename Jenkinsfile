@@ -3,7 +3,7 @@
 pipeline {
     agent none
     environment {
-        GITLEAKS_REPORT = 'gitleaks-report.json'
+        GITLEAKS_REPORT = 'gitleaks-report.csv'
         OWASP_DEP_REPORT = 'owasp-dep-report.json'
         ZAP_REPORT = 'zap-out.json'
         SEMGREP_REPORT = 'semgrep-report.json'
@@ -11,7 +11,7 @@ pipeline {
         }
 
     stages {
-                
+
         stage('Gitleak Check') {
             agent {
                 kubernetes {
@@ -23,7 +23,7 @@ pipeline {
                 container('gitleak') {
                     sh """
                         gitleaks version
-                        gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT}
+                        gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT} --report-format csv
                     """
                     archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}"
                 }
