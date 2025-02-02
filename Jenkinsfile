@@ -3,32 +3,15 @@
 pipeline {
     agent none
     environment {
+        GITLEAKS_REPORT = 'gitleaks-report.json'
+        OWASP_DEP_REPORT = 'owasp-dep-report.json'
+        ZAP_REPORT = 'zap-out.json'
+        SEMGREP_REPORT = 'semgrep-report.json'
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
-    }
+        }
 
-    stages {    
-
-        stage('Set Date to IST') {
-            steps {
-                script {
-                    // Get the current date in IST
-                    def sdf = new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
-                    sdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Kolkata"))
-                    def IST_DATE = sdf.format(new Date())
-                    echo "Timestamp in IST: ${IST_DATE}"
-
-                    // Setting the IST_DATE in environment variable
-                    env.IST_DATE = IST_DATE
-
-                    // Dynamically setting the report filenames
-                    env.GITLEAKS_REPORT = "gitleaks-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
-                    env.OWASP_DEP_REPORT = "owasp-dep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
-                    env.ZAP_REPORT = "zap-out-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
-                    env.SEMGREP_REPORT = "semgrep-report-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.IST_DATE}.json"
-                }
-            }
-        }   
-        
+    stages {
+                
         stage('Gitleak Check') {
             agent {
                 kubernetes {
