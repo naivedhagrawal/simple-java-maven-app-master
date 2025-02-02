@@ -3,10 +3,10 @@
 pipeline {
     agent none
     environment {
-        GITLEAKS_REPORT = 'gitleaks-report.sarif'
-        OWASP_DEP_REPORT = 'owasp-dep-report.sarif'
+        GITLEAKS_REPORT = 'gitleaks-report.csv'
+        OWASP_DEP_REPORT = 'owasp-dep-report.csv'
         ZAP_REPORT = 'zap-out.html'
-        SEMGREP_REPORT = 'semgrep-report.sarif'
+        SEMGREP_REPORT = 'semgrep-report.text'
         TARGET_URL = 'https://juice-shop.herokuapp.com/'
         }
 
@@ -23,7 +23,7 @@ pipeline {
                 container('gitleak') {
                     sh """
                         gitleaks version
-                        gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT} --report-format sarif
+                        gitleaks detect --source=. --report-path=${env.GITLEAKS_REPORT} --report-format csv
                     """
                     archiveArtifacts artifacts: "${env.GITLEAKS_REPORT}"
                 }
@@ -40,7 +40,7 @@ pipeline {
             container('owasp') {
                 withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
                 sh """
-                    dependency-check --scan . --format SARIF --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
+                    dependency-check --scan . --format csv --out ${env.OWASP_DEP_REPORT} --nvdApiKey ${env.NVD_API_KEY}
                 """
                 archiveArtifacts artifacts: "${env.OWASP_DEP_REPORT}"
 
@@ -73,7 +73,7 @@ pipeline {
             steps {
             container('semgrep') {
                 sh """
-                semgrep --config=auto --sarif --output ${env.SEMGREP_REPORT} .
+                semgrep --config=auto --text --output ${env.SEMGREP_REPORT} .
                 """
                 archiveArtifacts artifacts: "${env.SEMGREP_REPORT}"
 
@@ -123,7 +123,7 @@ pipeline {
             container('zap') {
                 // zap-api-scan.py zap-baseline.py zap-full-scan.py zap_common.py 
                 sh """
-                    zap-baseline.py -t $TARGET_URL -r $ZAP_REPORT -l WARN -I
+                    zap-full-scan.py -t $TARGET_URL -r $ZAP_REPORT -l WARN -I
                     mv /zap/wrk/${ZAP_REPORT} .
                 """
                 archiveArtifacts artifacts: "${env.ZAP_REPORT}"
