@@ -4,5 +4,5 @@ securityscan(
     gitleak: true,
     owaspdependency: true,
     semgrep: true,
-    checkov: falses
+    checkov: false
 )
